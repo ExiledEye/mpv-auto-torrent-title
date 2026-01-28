@@ -4,7 +4,7 @@
 
     loghelper.lua
     Author: Exiled Eye
-    Version: 1.0
+    Version: 1.0.1
     Description: Logging helper.
 
     Copyright (c) 2026 Exiled Eye

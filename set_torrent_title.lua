@@ -4,7 +4,7 @@
 
     start_torrent_metadata.lua
     Author: Exiled Eye
-    Version: 1.0
+    Version: 1.0.1
     Description: Title logic module.
 
     Copyright (c) 2026 Exiled Eye
@@ -73,43 +73,74 @@ end
 -- Caching stuff
 local cache = {}
 
-local function cache_load()
-    if not options.enable_cache then return end
-    if options.cache_file_path == "undefined" then return end
-
-    local f = io.open(options.cache_file_path, "r")
-    if not f then return end
-
-    for line in f:lines() do
-        local hash, title = line:match("^(%S+)%s+(.+)$")
-        if hash and title then
-            cache[hash] = title
-        end
+local function get_cache_path()
+    local path = options.cache_file_path
+    -- Default to script directory if undefined
+    if not path or path == "undefined" or path == "" then
+        path = mp.get_script_directory()
     end
 
-    f:close()
-    loghelper.consolelog_debug(options.verbose_debuglog,"Loaded title cache (" .. tostring(#cache) .. " entries)")
+    -- Ensure it treats the path as a directory add slash if missing
+    local last_char = path:sub(-1)
+    if last_char ~= "/" and last_char ~= "\\" then
+        path = path .. "/"
+    end
+
+    return path .. "title_cache.txt"
+end
+
+local function cache_load()
+    if not options.enable_cache then return end
+
+    -- pcall catches any crash inside the function and prevents script failure if cache read or write fails
+    local status, err = pcall(function()
+        local full_path = get_cache_path()
+        local f = io.open(full_path, "r")
+        
+        if not f then return end
+
+        for line in f:lines() do
+            local hash, title = line:match("^(%S+)%s+(.+)$")
+            if hash and title then
+                cache[hash] = title
+            end
+        end
+        f:close()
+        loghelper.consolelog_debug(options.verbose_debuglog, "Loaded title cache from: " .. full_path)
+    end)
+
+    if not status then
+        loghelper.consolelog_debug(true, "CACHE ERROR (Read): " .. tostring(err))
+    end
 end
 
 local function cache_save(hash, title)
     if not options.enable_cache then return end
-    if options.cache_file_path == "undefined" then return end
     if not hash or not title then return end
 
     cache[hash] = title
 
-    -- write failsafe
-    local tmp = options.cache_file_path .. ".tmp"
-    local f = io.open(tmp, "w")
-    if not f then return end
+    local status, err = pcall(function()
+        local full_path = get_cache_path()
+        local tmp = full_path .. ".tmp"
+        
+        local f = io.open(tmp, "w")
+        if not f then
+            error("Could not write to " .. full_path .. " (Check if directory exists)")
+        end
 
-    for h, t in pairs(cache) do
-        f:write(h .. " " .. t .. "\n")
+        for h, t in pairs(cache) do
+            f:write(h .. " " .. t .. "\n")
+        end
+
+        f:close()
+        os.remove(full_path)
+        os.rename(tmp, full_path)
+    end)
+
+    if not status then
+        loghelper.consolelog_debug(true, "CACHE ERROR (Write): " .. tostring(err))
     end
-
-    f:close()
-    os.remove(options.cache_file_path)
-    os.rename(tmp, options.cache_file_path)
 end
 
 cache_load()

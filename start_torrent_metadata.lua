@@ -4,7 +4,7 @@
 
     start_torrent_metadata.lua
     Author: Exiled Eye
-    Version: 1.0
+    Version: 1.0.1
     Description: Local server starter module.
 
     Copyright (c) 2026 Exiled Eye

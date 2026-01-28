@@ -4,7 +4,7 @@
 
     start_torrent_metadata.lua
     Author: Exiled Eye
-    Version: 1.0
+    Version: 1.0.1
     Description: Main script.
 
     Copyright (c) 2026 Exiled Eye
@@ -46,7 +46,7 @@ local options = { -- Options which can be changed in the mpv-auto-torrent-title.
 }
 require("mp.options").read_options(options, "mpv-auto-torrent-title")
 -- Kept the full table load even if not strictly needed to avoid mpv console warnings spam
-local current_version = "1.0"
+local current_version = "1.0.1"
 local utils = require 'mp.utils'
 local loghelper = require "loghelper"
 local base = mp.get_script_directory()
@@ -309,11 +309,15 @@ end
 
 -- Script loading
 local function set_title_local()
-    if is_server_ready() then
+    if local_check() then
         wait_for_server_and_load_title()
     else
         local success, err = pcall(dofile, starter_script_path)
-        if success then wait_for_server_and_load_title() else mp.msg.error("Failed to load local server script: " .. tostring(err)) end
+        if success then 
+            wait_for_server_and_load_title()
+        else
+            mp.msg.error("Failed to load local server script: " .. tostring(err))
+        end
     end
 end
 
@@ -325,9 +329,25 @@ local function set_title_remote()
     pcall(dofile, title_script_path)
 end
 
-local function set_title_stremio()
-    local success, err = pcall(dofile, starter_script_path)
-    if success then wait_for_server_and_load_title() else mp.msg.error("Failed to load local server script: " .. tostring(err)) end
+-- torrent-metadata logic
+local function execute_standard_logic()
+    if options.use_local_server then
+        server_url = options.local_server_url
+        set_title_local()
+    else
+        if options.fallback_to_local then
+            server_url = options.remote_server_url
+            if is_server_ready() then
+                set_title_remote()
+            else
+                server_url = options.local_server_url
+                set_title_local()
+            end
+        else
+            server_url = options.remote_server_url
+            set_title_remote()
+        end
+    end
 end
 
 -- Main execution
@@ -345,34 +365,19 @@ local function check_and_execute()
     end
 
     if options.use_stremio_service then
-        if options.fallback_to_torrentmetadata then
-            server_url = options.stremio_endpoint
-            if is_server_ready() then
-                set_title_stremio()
-                return
-            else
-                set_title_stremio()
-                return
-            end
-        else
-            server_url = options.local_server_url
-        end
-    end
-
-    if options.use_local_server then
-        set_title_local()
-    else
-        if options.fallback_to_local then
-            server_url = options.remote_server_url
-            if is_server_ready() then
-                set_title_remote()
-            else
-                server_url = options.local_server_url
-                set_title_local()
-            end
-        else
+        server_url = options.stremio_endpoint
+        if is_server_ready() then
             set_title_remote()
+        else
+            if options.fallback_to_torrentmetadata then -- Stremio offline fallback logic
+                loghelper.consolelog_info(options.verbose_infolog, "Stremio unreachable. Falling back to torrent-metadata...")
+                execute_standard_logic()
+            else
+                mp.msg.warn("Stremio service is not reachable or offline.")
+            end
         end
+    else
+        execute_standard_logic() -- Failsafe
     end
 end
 
