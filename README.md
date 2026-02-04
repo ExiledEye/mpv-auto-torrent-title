@@ -120,7 +120,7 @@ stop_server_on_exit=yes                           # Automatically kill the node 
 
 ## Notes
 
-* Generally using stremio is faster that the torrent-metadata public endpoint which is faster than using the local server unless it's not already running.
+* Generally using stremio is faster that the torrent-metadata public endpoint which is faster than using the local server unless the server is already running.
 * The local server killing on MPV shutdown might also kill other node.js processes, it depends on your system.
 * Trimming functionality is not very consistent right now.
 
