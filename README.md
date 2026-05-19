@@ -7,17 +7,6 @@ A Lua script for **MPV** that automatically retrieves and sets the correct media
 
 It resolves messy filenames (e.g., `announce&tr=dht:...`) into clean, readable titles (e.g., `Movie Name (2024)`)
 
-## Table of Contents
-
-*   [Features](#features)
-*   [Requirements](#requirements)
-*   [Installation](#installation)
-*   [How It Works](#how-it-works)
-*   [Torrent Metadata Server](#torrent-metadata-server)
-*   [Notes](#notes)
-*   [Support](#support)
-*   [License](#license)
-
 ## Features
 
 *   **Automatic Detection**: Instantly detects magnet links and localhost torrent streams.
