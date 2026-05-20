@@ -29,7 +29,7 @@ It resolves messy filenames (e.g., `announce&tr=dht:...`) into clean, readable t
 
 ## Installation
 
-1. **Git**: Navigate to the script directory and run `git pull`.  
+1. **Git**: Navigate to your scripts directory and run `git clone https://github.com/ExiledEye/mpv-auto-torrent-title`.  
    **Manual**: Download the latest release and extract the script folder in your scripts directory.
 2. Launch MPV once. The script will automatically install the default configuration file in your script-opts directory.
 3. Configure the mpv-auto-torrent-title.conf file in your script-opts directory.
@@ -60,7 +60,7 @@ mpv/
 If enabled (default) the script checks for updates: if a new version is found, the script will notify the user.  
 
 To update:  
-1. **Git**: Navigate to the scripts directory and run git pull.  
+1. **Git**: Navigate to the script's directory and run `git pull`.  
    **Manual**: Download the latest release and replace the script folder in your scripts directory.
 2. If the file mpv-auto-torrent-title.conf has been updated, you may need to delete your previously installed one in your script-opts directory, by doing so the updated .conf file will be installed at MPV next launch.
 
