@@ -5,7 +5,7 @@
 
 A Lua script for **MPV** that automatically retrieves and sets the correct media title for torrents (magnet links or `.torrent` files).
 
-It resolves messy filenames (e.g., `announce&tr=dht:...`) into clean, readable titles (e.g., `Media Name (1999)`)
+It resolves messy filenames (e.g. `announce&tr=dht:...`) into clean, readable titles (e.g. `Media Name (1999)`)
 
 ## Features
 
